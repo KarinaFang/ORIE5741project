@@ -15,4 +15,6 @@ Our goal is to analyze the covid testing data and identify the best features we 
 
   1. How to select symptom features to predict covid positive?
 
-  2. What is the relationship between the characteristics of patients and the possibility of testing positive?
+  2. What is the optimal model we can use to analyze the data?
+  
+  3. What is the relationship between the characteristics of patients and the possibility of testing positive?
