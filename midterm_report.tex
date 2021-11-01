@@ -1,0 +1,123 @@
+
+\documentclass[10pt, a4paper, twocolumn]{article} % 10pt font size (11 and 12 also possible), A4 paper (letterpaper for US letter) and two column layout (remove for one column)
+
+%\input{structure.tex} % Specifies the document structure and loads requires packages
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{ORIE5741 Midterm Report} % The article title
+
+\author{Karina Fang, Kornelia Wang, Pengbo Hao}
+
+
+\date{\today} % Add a date here if you would like one to appear underneath the title block, use \today for the current date, leave empty for no date
+
+%----------------------------------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{float}
+\begin{document}
+
+\maketitle % Print the title
+
+\thispagestyle{firstpage} % Apply the page style for the first page (no headers and footers)
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT
+%----------------------------------------------------------------------------------------
+\section{Introduction}
+\lettrineabstract{In the year 2020, the world suffered from an unprecedented pandemic COVID-19. Not only has the COVID-19 caused a tremendous amount of death worldwide and significant losses in economies, but this contagious disease is also ever-changing, developing new strains and variants rapidly. Although many methods, including quarantine and testing, have been adopted to prevent the spread of the disease, it can be costly for society if the administration were to perform quarantine and testing on a large scale. Moreover, the number of testing kits is limited and may be distributed unevenly across the country. To circumvent these constraints, it is vital to answer the question: can we predict the possibility of testing positive given the characteristics of a certain patient. By building a model using the data available, we will be able to prioritize the individuals in need and allocate the testing kits more efficiently. }
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section{Data}
+%------------------------------------------------
+
+\subsection{Data Descirption}
+
+For this project, we use the Aggregated US survey data made available to the public by CMU. This dataset is collected by Facebook, and sampled users receive the invitation at the top of their News Feed and the surveys are conducted off the Facebook app. Every day, a new sample of Facebook users over 18 years old are invited to consent and participate in the survey and self-report their COVID-19-related symptoms. Using this survey data, we estimate the percentage of people who have a COVID-like illness, in a given location, on a given day. All numerical data points are adjusted to be the 7 day trailing average (today, and the 6 previous days).
+
+The data originally has 162691 rows and 105 columns, containing 8 dimension columns and 50 signals. Among all the columns, the testing result columns, 35, 36, 37, 38 and 39, are our labels; the rest of the columns are our features. 
+
+
+\subsection{Data Cleaning}
+
+We generate a data matrix, use column 35 as a target vector, and create a train/test split so that we can empirically test for overfitting. To make the 80 / 20 train test split, we shuffle the data and select the first 80\% as the train data, with 20\% held out for validation.
+
+\subsection{Feature Selection}
+
+For feature selection, first we consider numerical variables that might be useful for predicting the results: Estimated percentage of people reporting that they have experienced COVID-19-related symptoms. These symptoms  include fever, cough, short of breath, difficulty breathing, tiredness or exhaustion, nasal congestion, a runny nose, muscle or joint aches, a sore throat, persistent pain or pressure in their chest, nausea or vomiting, diarrhea, loss of smell or taste, etc. 
+
+
+We also consider categorical variables: gender and age\_bucket, as these variables are also informative. Since possible values of gender and age\_bucket also contain “overall” (aggregation of all genders), we delete these rows to avoid duplication. Then we transform the data into one-hot vectors and concatenate those features with numerical data we had previously.
+
+
+We only took the examples for which the result of the estimated percentage of people reporting that they have tested positive for COVID-19 is known into consideration. Since this survey item is only presented to respondents who report they are currently experiencing symptoms, most responses are blank. 
+
+After data cleaning, we have 45381 rows x 100 columns in our data matrix. No data is missing in the feature matrix.
+%------------------------------------------------
+
+
+
+
+\section{Data Analysis}
+
+\subsection{Data Visualization}
+Data visualization is an important step to identify the important features that are useful in building the model and making predictions. We first visualized the correlation between different features to gain a better understanding of how different features might influence the probability of testing positive of a patient. Then, by plotting histograms of selected important features, we visualized the underlying distribution of selected features, which gave rise to the construction of the model. 
+
+\subsubsection{Correlation Visualization}
+As we can observe in Figure 1.1, the dependent variable “smoothed\_pct\_tested\_and\_positive” is highly correlated to feature “smoothed\_pct\_self\_fever” (7-day trailing average of the estimated percentage of people reporting that they have experienced a fever in the past 24 hours), “smoothed\_pct\_self\_anosmia\_ageusia”(7-day trailing average of the estimated percentage of people reporting that they have experienced the loss of smell or taste in the past 24 hours). Our dependent variable is also observed to be weakly correlated to feature “smoothed\_pct\_self\_difficulty\_breathing” (7-day trailing average of the estimated percentage of people reporting that they have experienced difficulty breathing in the past 24 hours), and “smoothed\_pct\_self\_nausea\_vomiting” (7-day trailing average of the estimated percentage of people reporting that they have experienced nausea or vomiting in the past 24 hours). All four features are aligned with the common belief of the symptoms of COVID-19. To better understand the data, we further plotted the histogram of each feature.
+
+\begin{figure}
+	\includegraphics[width=\linewidth]{1.png} % Figure image
+	\caption{correlation visualization} % Figure caption
+\end{figure}
+
+\subsubsection{Histogram Visualization}
+Before plotting the histogram, we first provide the summary data for the four features of interest in Table 1.1.
+
+Then, we plotted the histogram for each feature of interest and observed the underlying distribution of the data. As we can observe in Figure 1.2, while there are a significant amount of people reporting no sign of fever in the past 24 hours, the remaining percentage of people reporting a fever is approximately log normal distributed with mean around 0.8\%. Similarly, from Figure 1.3, there are a moderately large  amount of people reporting no experience of loss of smell or taste in the past 24 hours, the rest of the data suggesting an approximate log normal distribution with mean around 1.2\%. However, for the features that are weakly correlated to the dependent variable, as suggested in Figure 1.4 and Figure 1.5, the distribution of the data remains unclear. In order to have a better understanding of the data, we conducted preliminary analyses on the data utilizing linear regression.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width = \textwidth]{table_1.jpeg} 
+\end{center}
+\end{figure}
+\begin{figure}[H]
+    \centering
+	\includegraphics[width = 0.5\linewidth]{1_2.jpeg}\hfill \hfill\includegraphics[width = 0.5\linewidth]{1_3.jpeg}
+\end{figure}
+\begin{figure}
+    \centering
+	\includegraphics[width = 0.5\linewidth]{1_4.jpeg}\hfill \hfill\includegraphics[width = 0.5\linewidth]{1_5.jpeg}
+\end{figure}
+\newpage
+\subsection{Preliminary Analysis}
+
+
+For the preliminary analysis, we fit a linear model on the data
+ with the features selected from the data clean up step as well as an offset term. After fitting the linear model, we also computed the MSE for both training and testing data. We then run the OLS function and bypass any SVD convergence errors by refitting the model. 
+ 
+\begin{figure}[H]
+	\includegraphics[width = \linewidth]{1_6.png} 
+\end{figure}
+ 
+ \vspace*{13\baselineskip}
+ Figure 1.6 shows our linear prediction, with a training MSE of 1.4434 and a testing MSE of 1.4465. The training MSE and testing MSE are similar with each other and they are low based on our original dataset. Therefore, the model we currently fit is neither overfitting nor underfitting.
+ 
+ 
+ \section{Future Steps}
+ In our current analysis, we have made some preliminary models with linear regression to predict the probability of testing positive for covid-19. We tested the effectiveness of our model by splitting our data into training and testing sets and calculated the mean squared errors for evaluation.
+ 
+ \vspace{12pt} % Whitespace
+ 
+In the future, we plan to continue this strategy and incorporate k-fold cross validation and apply methods like control burn and bagging to add the complexity of our model. We will also experiment with regularization and use different loss funcitons such as hinge loss and logistic loss to update our prediction model. At the same time, we plan to try other methods to have a better evaluation on the model.
+
+
+
+
+
+\end{document}
