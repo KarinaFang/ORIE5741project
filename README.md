@@ -1,6 +1,8 @@
 # ORIE 5741 project
 Name of the Project: Can we predict the possibility of testing positive given the characteristics of a certain patient?
 
+Project Presentation Link: https://youtu.be/u0rG-pHxOOI
+
 
 Names and NetIDs of the project members:
 
